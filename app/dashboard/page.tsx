@@ -20,6 +20,7 @@ import {
   query,
   where,
   orderBy,
+  getDoc
 } from "firebase/firestore"
 import { ActivityForm } from "@/components/activity-form"
 import { ActivityList } from "@/components/activity-list"
@@ -50,7 +51,7 @@ import {
   Home,
   ListFilter
 } from "lucide-react"
-import type { Activity } from "@/lib/types"
+import type { Activity, UserProfile } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 
@@ -73,13 +74,15 @@ export default function DashboardPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [selectedTab, setSelectedTab] = useState("dashboard")
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user)
+        await fetchUserProfile(user.uid)
         fetchActivities(user.uid)
       } else {
         router.push("/login")
@@ -89,6 +92,60 @@ export default function DashboardPage() {
 
     return () => unsubscribe()
   }, [router])
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error("No authenticated user found");
+        return;
+      }
+  
+      // Get user profile from Firestore
+      const docRef = doc(db, "userProfiles", userId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const profileData = docSnap.data();
+        setUserProfile({
+          id: docSnap.id,
+          authProvider: profileData.authProvider || 'email',
+          bio: profileData.bio || '',
+          createdAt: profileData.createdAt?.toDate() || new Date(),
+          displayName: profileData.displayName || currentUser.email?.split('@')[0] || 'User',
+          email: profileData.email || currentUser.email || '',
+          lastLogin: profileData.lastLogin?.toDate() || new Date(),
+          photoURL: profileData.photoURL || '',
+          username: profileData.username || profileData.displayName || currentUser.email?.split('@')[0] || 'user'
+        });
+      } else {
+        // Create default profile if none exists
+        setUserProfile({
+          authProvider: 'email',
+          bio: '',
+          createdAt: new Date(),
+          displayName: currentUser.email?.split('@')[0] || 'User',
+          email: currentUser.email || '',
+          lastLogin: new Date(),
+          photoURL: '',
+          username: currentUser.email?.split('@')[0] || 'user'
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      const currentUser = auth.currentUser;
+      setUserProfile({
+        authProvider: 'unknown',
+        bio: '',
+        createdAt: new Date(),
+        displayName: currentUser?.email?.split('@')[0] || 'User',
+        email: currentUser?.email || '',
+        lastLogin: new Date(),
+        photoURL: '',
+        username: currentUser?.email?.split('@')[0] || 'user'
+      });
+    }
+  }
 
   const fetchActivities = async (userId: string) => {
     try {
@@ -176,6 +233,13 @@ export default function DashboardPage() {
     )
   }
 
+  const getUserInitials = () => {
+    if (userProfile?.name) {
+      return userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase()
+    }
+    return user?.email?.charAt(0)?.toUpperCase() || 'U'
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/30 shadow-sm">
@@ -202,13 +266,13 @@ export default function DashboardPage() {
                   <div className="p-4 border-b">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src="" alt={user?.email?.charAt(0) || "User"} />
+                        <AvatarImage src={userProfile?.photoURL || ""} alt={userProfile?.name || "User"} />
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          {user?.email?.charAt(0)?.toUpperCase() || "U"}
+                          {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium">{user?.email}</p>
+                        <p className="text-sm font-medium truncate">{userProfile?.name || user?.email}</p>
                         <Badge variant="outline" className="text-xs font-normal px-1">
                           Active Member
                         </Badge>
@@ -307,13 +371,15 @@ export default function DashboardPage() {
             
             <div className="hidden md:flex items-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt={user?.email?.charAt(0) || "User"} />
+                <AvatarImage src={userProfile?.photoURL || ""} alt={userProfile?.name || "User"} />
                 <AvatarFallback className="bg-primary/10 text-primary">
-                  {user?.email?.charAt(0)?.toUpperCase() || "U"}
+                  {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden lg:block">
-                <p className="text-sm font-medium leading-none">{user?.email}</p>
+                <p className="text-sm font-medium leading-none truncate max-w-[160px]">
+                  {userProfile?.name || user?.email}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">Active Member</p>
               </div>
               <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full">
@@ -414,7 +480,7 @@ export default function DashboardPage() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-                  <p className="text-muted-foreground mt-1">Welcome back to your fitness journey</p>
+                  <p className="text-muted-foreground mt-1">Welcome back{userProfile?.name ? `, ${userProfile.name}` : ''}!</p>
                 </div>
                 
                 <Button className="md:w-auto w-full" size="sm">
@@ -496,7 +562,15 @@ export default function DashboardPage() {
                   <CardDescription>Manage your account information</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UserProfileForm userId={user.uid} />
+                  <UserProfileForm 
+                    userId={user.uid} 
+                    initialData={{
+                      displayName: userProfile?.displayName || '',
+                      email: user?.email || '',
+                      photoURL: userProfile?.photoURL || ''
+                    }} 
+                    onProfileUpdate={fetchUserProfile}
+                  />
                 </CardContent>
               </Card>
             </div>
