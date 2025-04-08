@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "VitalBeat-fitness",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -19,7 +19,7 @@
     "@radix-ui/react-context-menu": "^2.2.4",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
-    "@radix-ui/react-hover-card": "^1.1.4",
+    "@radix-ui/react-hover-card": "^1.1.6",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-menubar": "^1.1.4",
     "@radix-ui/react-navigation-menu": "^1.2.3",
@@ -36,7 +36,7 @@
     "@radix-ui/react-toast": "^1.2.4",
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
-    "@radix-ui/react-tooltip": "^1.1.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
