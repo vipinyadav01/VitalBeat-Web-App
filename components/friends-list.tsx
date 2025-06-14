@@ -389,51 +389,58 @@ export function FriendsList({ userId }: FriendsListProps) {
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-white/90 backdrop-blur-xl shadow-2xl border-0 rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-6 w-6 animate-pulse" />
+    <Card className="w-full mx-auto bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/20 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_48px_rgba(0,0,0,0.18)] sm:mx-4 lg:mx-auto">
+      <CardHeader className="bg-black text-white p-6 md:p-8">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-4">
+            <Users className="h-7 w-7 opacity-80 transition-opacity group-hover:opacity-100" />
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Friends</h2>
-              <p className="text-white/80 text-sm">Your fitness community</p>
+              <h2 className="text-3xl font-bold tracking-tight">Friends</h2>
+              <p className="text-white/70 text-sm font-light">Your fitness community</p>
             </div>
           </div>
           {recentlyActive.length > 0 && (
             <div className="mt-2">
-              <h3 className="text-sm font-medium text-white/90 mb-2">Active Friends</h3>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              <h3 className="text-sm font-medium text-white/80 mb-4">Recently Active</h3>
+              <div className="grid grid-flow-col auto-cols-max gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
                 {recentlyActive.map((friend) => (
                   <TooltipProvider key={friend.profile?.id}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="flex flex-col items-center transition-transform hover:scale-105">
-                          <Avatar className="h-14 w-14 border-2 border-white/50 shadow-lg">
-                            <AvatarImage src={friend.profile?.photoURL} />
-                            <AvatarFallback className="bg-indigo-700 text-white">
-                              {friend.profile?.username?.charAt(0) || "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs text-white mt-1 max-w-16 truncate">
+                        <div className="flex flex-col items-center group cursor-pointer">
+                          <div className="relative">
+                            <Avatar className="h-16 w-16 border-2 border-white/20 transition-all duration-300 group-hover:border-white/40 group-hover:scale-105">
+                              <AvatarImage src={friend.profile?.photoURL} className="object-cover" />
+                              <AvatarFallback className="bg-white/10 text-white backdrop-blur-sm">
+                                {friend.profile?.username?.charAt(0) || "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <Badge 
+                              variant="secondary" 
+                              className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs px-2"
+                            >
+                              {friend.goals?.minutesActive || 0}m
+                            </Badge>
+                          </div>
+                          <span className="text-sm text-white/80 mt-4 font-medium max-w-20 truncate text-center">
                             {friend.profile?.displayName?.split(' ')[0]}
                           </span>
-                          <Badge variant="secondary" className="mt-1 bg-purple-400/30 text-white border-purple-300/50">
-                            {friend.goals?.minutesActive || 0}m
-                          </Badge>
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent className="bg-gray-900 text-white border-gray-800">
-                        <div className="p-3 space-y-1">
-                          <p className="font-semibold">{friend.profile?.displayName}</p>
-                          <p className="text-xs flex items-center gap-1">
-                            <Dumbbell className="h-3 w-3" /> {friend.goals?.workoutsCompleted || 0} workouts
-                          </p>
-                          <p className="text-xs flex items-center gap-1">
-                            <Flame className="h-3 w-3" /> {friend.goals?.caloriesBurned || 0} cal
-                          </p>
-                          <p className="text-xs flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> Last: {formatDate(friend.goals?.lastWorkout)}
-                          </p>
+                      <TooltipContent className="bg-black/90 backdrop-blur-lg border border-white/10">
+                        <div className="p-4 space-y-2">
+                          <p className="font-medium text-white">{friend.profile?.displayName}</p>
+                          <div className="space-y-1.5 text-white/70">
+                            <p className="text-xs flex items-center gap-2">
+                              <Dumbbell className="h-3.5 w-3.5" /> {friend.goals?.workoutsCompleted || 0} workouts
+                            </p>
+                            <p className="text-xs flex items-center gap-2">
+                              <Flame className="h-3.5 w-3.5" /> {friend.goals?.caloriesBurned || 0} calories
+                            </p>
+                            <p className="text-xs flex items-center gap-2">
+                              <Clock className="h-3.5 w-3.5" /> Last active: {formatDate(friend.goals?.lastWorkout)}
+                            </p>
+                          </div>
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -446,58 +453,87 @@ export function FriendsList({ userId }: FriendsListProps) {
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              placeholder="Search by username or name"
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-12 h-12 rounded-xl bg-white/80 border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-            />
-            <Button
-              onClick={() => debouncedSearch(searchTerm)}
-              disabled={searching}
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors"
-            >
-              {searching ? (
-                <span className="animate-spin">⌀</span>
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative flex items-center">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors duration-300" />
+              <Input
+                placeholder="Search by username or name"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full pl-14 pr-20 h-14 text-lg rounded-2xl bg-white/90 backdrop-blur-sm border-2 border-gray-100 
+                  focus:border-purple-500 focus:ring-4 focus:ring-purple-200/50 
+                  placeholder:text-gray-400 shadow-lg shadow-purple-500/5
+                  transition-all duration-300 ease-in-out
+                  hover:bg-white hover:shadow-purple-500/10
+                  dark:bg-gray-900/90 dark:border-gray-800 dark:placeholder:text-gray-500"
+              />
+              <Button
+                onClick={() => debouncedSearch(searchTerm)}
+                disabled={searching}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 px-4
+                  bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700
+                  text-white font-medium rounded-xl shadow-lg shadow-purple-500/20
+                  transform transition-all duration-300 ease-out
+                  hover:scale-105 hover:shadow-purple-500/30
+                  active:scale-95 disabled:opacity-70 disabled:hover:scale-100"
+              >
+                {searching ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                ) : (
+                  <Search className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
           </div>
 
           {searchResults.length > 0 && (
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-gray-100/50 animate-in fade-in-50">
-              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Search className="h-4 w-4 text-purple-500" />
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20 
+              transform transition-all duration-300 hover:shadow-3xl hover:scale-[1.01]
+              animate-in fade-in-50 slide-in-from-top-5">
+              <h3 className="font-bold text-xl text-gray-900 mb-4 flex items-center gap-3">
+                <div className="bg-purple-100 p-2 rounded-xl">
+                  <Search className="h-5 w-5 text-purple-600" />
+                </div>
                 Results ({searchResults.length})
               </h3>
-              <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2">
                 {searchResults.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/80 transition-all border border-gray-100/50"
+                    className="flex items-center justify-between p-4 rounded-xl 
+                      bg-gradient-to-br from-white to-purple-50/50
+                      hover:from-purple-50/50 hover:to-white
+                      transition-all duration-300 border border-purple-100/30
+                      hover:border-purple-200 hover:shadow-lg group"
                   >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-11 w-11 ring-2 ring-purple-200/50">
-                        <AvatarImage src={user.photoURL} />
-                        <AvatarFallback className="bg-purple-100 text-purple-600">
-                          {user.username?.charAt(0) || "U"}
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-14 w-14 ring-4 ring-purple-100 group-hover:ring-purple-200 
+                        transition-all duration-300 transform group-hover:scale-105">
+                        <AvatarImage src={user.photoURL} className="object-cover" />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-600 text-white font-bold">
+                          {user.username?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="font-medium text-gray-800">{user.displayName}</p>
-                        <p className="text-sm text-gray-500">@{user.username}</p>
+                      <div className="space-y-1">
+                        <p className="font-semibold text-lg text-gray-900 group-hover:text-purple-700 transition-colors">
+                          {user.displayName}
+                        </p>
+                        <p className="text-sm text-gray-500 group-hover:text-purple-500 transition-colors">
+                          @{user.username}
+                        </p>
                       </div>
                     </div>
                     <Button
-                      size="sm"
-                      className="bg-purple-600 hover:bg-purple-700 rounded-lg text-white shadow-md transition-all hover:shadow-lg"
+                      size="lg"
+                      className="bg-purple-600 hover:bg-purple-700 rounded-xl text-white 
+                        shadow-lg shadow-purple-200 hover:shadow-purple-300
+                        transition-all duration-300 transform hover:scale-105
+                        px-6 py-2 font-medium"
                       onClick={() => sendFriendRequest(user.id)}
                     >
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Add
+                      <UserPlus className="h-5 w-5 mr-2" />
+                      Connect
                     </Button>
                   </div>
                 ))}
@@ -506,126 +542,130 @@ export function FriendsList({ userId }: FriendsListProps) {
           )}
 
           <Tabs defaultValue="friends" className="mt-6">
-            <TabsList className="grid grid-cols-3 gap-2 bg-gray-100/80 backdrop-blur-sm p-2 rounded-xl border border-gray-200/50">
+            <TabsList className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-black/5 backdrop-blur-lg p-3 rounded-2xl border border-black/10 hover:bg-black/10 transition-all duration-300">
               {["friends", "pending", "sent"].map((tab) => (
                 <TabsTrigger
                   key={tab}
                   value={tab}
-                  className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-purple-600 transition-all"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl
+                    text-black/60 hover:text-black
+                    data-[state=active]:bg-white data-[state=active]:shadow-[0_8px_32px_rgba(0,0,0,0.12)]
+                    data-[state=active]:text-black data-[state=active]:scale-105
+                    transition-all duration-300 ease-out"
                 >
-                  {tab === "friends" && <Users className="h-4 w-4 mr-2" />}
-                  {tab === "pending" && <UserCog className="h-4 w-4 mr-2" />}
-                  {tab === "sent" && <Send className="h-4 w-4 mr-2" />}
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)} (
-                  {tab === "friends" ? friends.length : tab === "pending" ? pendingRequests.length : sentRequests.length})
+                  {tab === "friends" && <Users className="h-4 w-4" />}
+                  {tab === "pending" && <UserCog className="h-4 w-4" />}
+                  {tab === "sent" && <Send className="h-4 w-4" />}
+                  <span className="font-medium">
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </span>
+                  <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full bg-black/5 text-sm">
+                    {tab === "friends" ? friends.length : tab === "pending" ? pendingRequests.length : sentRequests.length}
+                  </span>
                 </TabsTrigger>
               ))}
             </TabsList>
 
             <TabsContent value="friends" className="mt-6">
               {loading ? (
-                <div className="text-center py-12 bg-gray-50/80 rounded-xl">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading friends...</p>
+                <div className="text-center py-12 bg-black/5 rounded-xl">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent mx-auto mb-4"></div>
+                  <p className="text-black/60">Loading friends...</p>
                 </div>
               ) : !friends.length ? (
-                <div className="text-center py-12 bg-gray-50/80 rounded-xl">
-                  <Users className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-600">No friends yet. Start connecting!</p>
+                <div className="text-center py-12 bg-black/5 rounded-xl hover:bg-black/10 transition-all">
+                  <Users className="h-16 w-16 mx-auto text-black/30 mb-3 animate-pulse" />
+                  <p className="text-black/60">No friends yet. Start connecting!</p>
                   <Button
                     onClick={() => setSearchTerm("")}
                     variant="outline"
-                    className="mt-4 border-purple-200 text-purple-600 hover:bg-purple-50 transition-all"
+                    className="mt-4 border-black hover:bg-black hover:text-white transition-all duration-300"
                   >
                     <Search className="h-4 w-4 mr-2" />
                     Find Friends
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {friends.map((friend) => (
                     <div
                       key={friend.connection.id}
-                      className="rounded-xl bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all border border-gray-100/50 overflow-hidden animate-in fade-in-25"
+                      className="rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-black/10 overflow-hidden group"
                     >
-                      <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center justify-between p-6 hover:bg-black/5 transition-colors">
                         <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12 ring-2 ring-purple-200/50">
+                          <Avatar className="h-14 w-14 ring-2 ring-black/10 group-hover:ring-black/30 transition-all">
                             <AvatarImage src={friend.profile?.photoURL} />
-                            <AvatarFallback className="bg-purple-100 text-purple-600">
+                            <AvatarFallback className="bg-black text-white">
                               {friend.profile?.username?.charAt(0) || "U"}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-semibold text-gray-800 text-lg">{friend.profile?.displayName}</p>
-                            <p className="text-sm text-gray-500">@{friend.profile?.username}</p>
+                            <p className="font-bold text-xl text-black">{friend.profile?.displayName}</p>
+                            <p className="text-sm text-black/60">@{friend.profile?.username}</p>
                           </div>
                         </div>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-lg border-gray-300 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-all"
+                          className="rounded-full border-black/20 hover:bg-black hover:text-white transition-all duration-300"
                           onClick={() => removeFriend(friend.connection.id)}
                         >
                           Remove
                         </Button>
                       </div>
                       {friend.goals && (
-                        <div className="px-4 pb-4 pt-2 bg-gray-50/80 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                          <div className="flex flex-col items-center">
-                            <div className="flex items-center text-purple-600 mb-1">
-                              <Dumbbell className="h-4 w-4 mr-1" />
-                              <span className="text-xs font-medium">Workouts</span>
-                            </div>
-                            <div className="flex items-baseline">
-                              <span className="text-xl font-bold text-gray-800">{friend.goals.workoutsCompleted || 0}</span>
-                              <span className="text-xs text-gray-500 ml-1">/{friend.goals.workoutsTarget || 50}</span>
+                        <div className="p-6 bg-black/5 grid grid-cols-2 gap-6">
+                          <div className="space-y-3 group/stat hover:bg-white rounded-lg p-3 transition-all">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center text-black gap-2">
+                                <Dumbbell className="h-5 w-5" />
+                                <span className="font-medium">Workouts</span>
+                              </div>
+                              <span className="text-2xl font-bold">{friend.goals.workoutsCompleted || 0}</span>
                             </div>
                             <Progress
                               value={Math.min(100, ((friend.goals.workoutsCompleted || 0) / (friend.goals.workoutsTarget || 50)) * 100)}
-                              className="h-1 w-full mt-1 bg-gray-200 [&>div]:bg-purple-500"
+                              className="h-2 bg-black/10 [&>div]:bg-black"
                             />
                           </div>
-                          <div className="flex flex-col items-center">
-                            <div className="flex items-center text-indigo-600 mb-1">
-                              <Target className="h-4 w-4 mr-1" />
-                              <span className="text-xs font-medium">Streak</span>
-                            </div>
-                            <div className="flex items-baseline">
-                              <span className="text-xl font-bold text-gray-800">{friend.goals.streakDays || 0}</span>
-                              <span className="text-xs text-gray-500 ml-1">days</span>
+                          <div className="space-y-3 group/stat hover:bg-white rounded-lg p-3 transition-all">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center text-black gap-2">
+                                <Target className="h-5 w-5" />
+                                <span className="font-medium">Streak</span>
+                              </div>
+                              <span className="text-2xl font-bold">{friend.goals.streakDays || 0}</span>
                             </div>
                             <Progress
                               value={Math.min(100, (friend.goals.streakDays || 0) * 3.33)}
-                              className="h-1 w-full mt-1 bg-gray-200 [&>div]:bg-indigo-500"
+                              className="h-2 bg-black/10 [&>div]:bg-black"
                             />
                           </div>
-                          <div className="flex flex-col items-center">
-                            <div className="flex items-center text-orange-600 mb-1">
-                              <Flame className="h-4 w-4 mr-1" />
-                              <span className="text-xs font-medium">Calories</span>
-                            </div>
-                            <div className="flex items-baseline">
-                              <span className="text-xl font-bold text-gray-800">{friend.goals.caloriesBurned || 0}</span>
-                              <span className="text-xs text-gray-500 ml-1">cal</span>
+                          <div className="space-y-3 group/stat hover:bg-white rounded-lg p-3 transition-all">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center text-black gap-2">
+                                <Flame className="h-5 w-5" />
+                                <span className="font-medium">Calories</span>
+                              </div>
+                              <span className="text-2xl font-bold">{friend.goals.caloriesBurned || 0}</span>
                             </div>
                             <Progress
                               value={Math.min(100, (friend.goals.caloriesBurned || 0) / 2000 * 100)}
-                              className="h-1 w-full mt-1 bg-gray-200 [&>div]:bg-orange-500"
+                              className="h-2 bg-black/10 [&>div]:bg-black"
                             />
                           </div>
-                          <div className="flex flex-col items-center">
-                            <div className="flex items-center text-green-600 mb-1">
-                              <Clock className="h-4 w-4 mr-1" />
-                              <span className="text-xs font-medium">Active</span>
-                            </div>
-                            <div className="flex items-baseline">
-                              <span className="text-xl font-bold text-gray-800">{friend.goals.minutesActive || 0}</span>
-                              <span className="text-xs text-gray-500 ml-1">min</span>
+                          <div className="space-y-3 group/stat hover:bg-white rounded-lg p-3 transition-all">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center text-black gap-2">
+                                <Clock className="h-5 w-5" />
+                                <span className="font-medium">Active</span>
+                              </div>
+                              <span className="text-2xl font-bold">{friend.goals.minutesActive || 0}</span>
                             </div>
                             <Progress
                               value={Math.min(100, (friend.goals.minutesActive || 0) / 150 * 100)}
-                              className="h-1 w-full mt-1 bg-gray-200 [&>div]:bg-green-500"
+                              className="h-2 bg-black/10 [&>div]:bg-black"
                             />
                           </div>
                         </div>
